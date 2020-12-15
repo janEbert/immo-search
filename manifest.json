@@ -1,0 +1,24 @@
+{
+
+  "description": "Make real estate information more easily available.",
+  "manifest_version": 2,
+  "name": "ImmoSearch",
+  "version": "0.1",
+  "icons": {
+    "48": "icons/border-48.png"
+  },
+
+  "permissions": ["storage"],
+
+  "content_scripts": [
+    {
+      "matches": ["*://www.immobilienscout24.de/expose/*"],
+      "js": ["src/common.js", "src/immoscout24.js"]
+    },
+    {
+      "matches": ["*://www.wg-gesucht.de/*"],
+      "js": ["src/common.js", "src/wg-gesucht.js"]
+    }
+  ]
+
+}
