@@ -12,14 +12,26 @@
 // } from "./common.js";
 
 
-async function parseTitlePhotoDiv(titlePhotoDiv, parsedData) {
-	console.log("debug titlephoto");
+function findMoreThanTitleDiv(titlePhotoDiv) {
+	const noPicturesTitleDiv = document.getElementById("noImagesTeaser");
+	if (noPicturesTitleDiv !== null) {
+		return noPicturesTitleDiv.firstElementChild;
+	}
+
 	const titlePhotoGroupDiv = titlePhotoDiv.firstElementChild
 		.nextElementSibling
 		.nextElementSibling
 		.nextElementSibling;
 	const moreThanTitleDiv = titlePhotoGroupDiv.firstElementChild
 		  .firstElementChild;
+	return moreThanTitleDiv;
+}
+
+
+async function parseTitlePhotoDiv(titlePhotoDiv, parsedData) {
+	console.log("debug titlephoto");
+
+	const moreThanTitleDiv = findMoreThanTitleDiv(titlePhotoDiv);
 	while (moreThanTitleDiv.innerText.trim() === "") {
 		await shortSleep(500);
 	}
@@ -86,8 +98,9 @@ function parseEstateOverviewDiv(estateOverviewDiv, parsedData) {
 	const [addressStreetAndNumber, postalCodeTownAndRegion] = (
 		splitAt(address, "\n")
 	);
+	// Not a given that there's a number
 	const [addressStreetAndMaybeComma, addressNumber] = splitAtLast(
-		address,
+		addressStreetAndNumber,
 		" "
 	);
 	const addressStreet = addressStreetAndMaybeComma.slice(-1) === ","
@@ -126,12 +139,17 @@ function parseEstateOverviewDiv(estateOverviewDiv, parsedData) {
 		availableFromLabelAndDate,
 		": "
 	);
-	const [availableUntilLabel, availableUntilDate] = splitAt(
-		availableUntilLabelAndDate,
-		": "
-	);
 	parsedData.availableFromDate = germanDateToIso(availableFromDate);
-	parsedData.availableUntilDate = germanDateToIso(availableUntilDate);
+
+	if (availableUntilLabelAndDate !== null) {
+		const [availableUntilLabel, availableUntilDate] = splitAt(
+			availableUntilLabelAndDate,
+			": "
+		);
+		if (isGermanDate(availableUntilDate)) {
+			parsedData.availableUntilDate = germanDateToIso(availableUntilDate);
+		}
+	}
 }
 
 
@@ -311,6 +329,11 @@ async function enhanceWGG() {
 
 
 async function main() {
+	if (document.getElementById("WG-Pictures") === null
+		&& document.getElementById("noImagesTeaser") === null) {
+		console.log("We are not on an individual listing page.");
+		return;
+	}
 	// await shortSleep(1000);
 
 	console.log("Starting enhancements!");

@@ -13,6 +13,7 @@ class ParsedData {
 		this.estateType = "";
 		this.availableFromDate = "";
 		this.availableUntilDate = "";
+		// TODO check whether trade offer
 
 		// Location
 		this.addressStreet = "";
@@ -133,7 +134,7 @@ class ParsedData {
 	formatColdRentPerArea() {
 		return [
 			"Kalt/Fläche",
-			roundPrice(this.coldRentPerArea)
+			formatPrice(this.coldRentPerArea)
 				+ " " + this.formatColdRentUnit()[1]
 				+ "/" + this.formatFloorAreaUnit()[1]
 		];
@@ -150,7 +151,7 @@ class ParsedData {
 	formatTotalRentPerArea() {
 		return [
 			"Gesamt/Fläche",
-			roundPrice(this.totalRentPerArea)
+			formatPrice(this.totalRentPerArea)
 				+ " " + this.formatTotalRentUnit()[1]
 				+ "/" + this.formatFloorAreaUnit()[1]
 		];
@@ -170,7 +171,7 @@ class ParsedData {
 	formatAdditionalCostsPerArea() {
 		return [
 			"NK/Fläche",
-			roundPrice(this.additionalCostsPerArea)
+			formatPrice(this.additionalCostsPerArea)
 				+ " " + this.formatAdditionalCostsUnit()[1]
 				+ "/" + this.formatFloorAreaUnit()[1]
 		];
@@ -415,6 +416,9 @@ function shortSleep(ms) {
 
 function splitAt(text, separator) {
 	const separatorIndex = text.indexOf(separator);
+	if (separatorIndex === -1) {
+		return [text, null];
+	}
 	const left = text.slice(0, separatorIndex);
 	const right = text.slice(separatorIndex + separator.length);
 	return [left, right];
@@ -423,6 +427,9 @@ function splitAt(text, separator) {
 
 function splitAtMatch(text, regexp) {
 	const matchIndex = text.search(regexp);
+	if (matchIndex === -1) {
+		return [text, null];
+	}
 	const left = text.slice(0, matchIndex);
 	const right = text.slice(matchIndex);
 	return [left, right];
@@ -431,6 +438,9 @@ function splitAtMatch(text, regexp) {
 
 function splitAtLast(text, separator) {
 	const lastSeparatorIndex = text.lastIndexOf(separator);
+	if (lastSeparatorIndex === -1) {
+		return [text, null];
+	}
 	const left = text.slice(0, lastSeparatorIndex);
 	const right = text.slice(lastSeparatorIndex + separator.length);
 	return [left, right];
@@ -449,8 +459,22 @@ function roundPrice(price) {
 }
 
 
+function formatPrice(price) {
+	const roundedPrice = roundPrice(price);
+	if (roundedPrice === 0) {
+		return "0";
+	}
+	return roundedPrice.toFixed(2);
+}
+
+
+function isGermanDate(date) {
+	return /^\d\d?.\d\d?.\d?\d?\d{2}$/.test(date);
+}
+
+
 function germanDateToIso(date) {
-	if (!/^\d\d?.\d\d?.\d?\d?\d{2}$/.test(date)) {
+	if (!isGermanDate(date)) {
 		return date;
 	}
 	return date.split(".").reverse().join("-");
@@ -499,7 +523,7 @@ function createDetailsNode(summaryText) {
 
 function createStoreButton(parsedData) {
 	const button = document.createElement("button");
-	button.innerHTML = "Anzeige Speichern";
+	button.innerHTML = "Anzeige speichern";
 	button.style.padding = "2px";
 	button.style.marginBottom = "1rem";
 
