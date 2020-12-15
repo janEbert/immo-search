@@ -1,6 +1,8 @@
 # ImmoSearch
 
-Easily see relevant information for real estate listings.
+Easily see relevant information for real estate listings. This only
+applies local transformations of a clicked on listing so the user can
+worry about captchas, JavaScript and other fun.
 
 You can store any listing using the button at the top of the page.
 These are stored in the Firefox local storage as JSON with a
