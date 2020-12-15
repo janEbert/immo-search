@@ -13,7 +13,7 @@ on the text and it will be copied to your clipboard.
 
 ## Installation
 
-Go to <about:debugging#/runtime/this-firefox> and select "Load
+Go to `about:debugging#/runtime/this-firefox` and select "Load
 Temporary Add-on...". Then select the [manifest.json](./manifest.json)
 file in this repository's root.
 
