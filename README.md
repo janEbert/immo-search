@@ -4,6 +4,9 @@ Easily see relevant information for real estate listings. This only
 applies local transformations to individual listing pages so the user
 can worry about captchas, JavaScript and other fun.
 
+
+## Usage
+
 You can store any listing using the button at the top of the page.
 These are stored in the Firefox local storage as JSON with a
 uniquely-identifiable key.
@@ -12,6 +15,12 @@ There is also machine-processable data hidden in a `details` tag below
 the human-readable table (in formats for [Org
 Mode](https://orgmode.org) tables and JSON). For those, you can click
 on the text and it will be copied to your clipboard.
+
+Finally, you can choose and reorder the default columns shown using
+the add-on option UI (don't forget to click "apply" `;)`). There, you
+can also view and manage your stored data. For example, you can click
+on individual keys in the table to delete the whole row. By clicking
+on the values instead, the data is copied to the clipboard.
 
 ## Installation
 
