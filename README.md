@@ -21,10 +21,11 @@ Mode](https://orgmode.org) tables and JSON). For those, you can click
 on the text and it will be copied to your clipboard.
 
 Finally, you can choose and reorder the default columns shown using
-the add-on option UI (don't forget to click "apply" `;)`). There, you
-can also view and manage your stored data. For example, you can click
-on individual keys in the table to delete the whole row. By clicking
-on the values instead, the data is copied to the clipboard.
+drag-and-drop in the add-on option UI (don't forget to click "apply"
+`;)`). There, you can also view and manage your stored data. For
+example, you can click on individual keys in the table to delete the
+whole row. By clicking on the values instead, the data is copied to
+the clipboard.
 
 ## Installation
 
