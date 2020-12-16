@@ -4,8 +4,12 @@ Easily see relevant information for real estate listings. This only
 applies local transformations to individual listing pages so the user
 can worry about captchas, JavaScript and other fun.
 
-
 ## Usage
+
+Simply navigate to an individual listing on one of the [supported
+websites](#supported-websites). The page will then automatically be
+updated with the overview information at the top while the rest of the
+page stays untouched.
 
 You can store any listing using the button at the top of the page.
 These are stored in the Firefox local storage as JSON with a
