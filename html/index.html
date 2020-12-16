@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<!-- <meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; font-src 'self'; img-src 'self'; object-src 'none'; script-src 'self'; style-src 'self'\"> -->
+		<title>ImmoSearch</title>
+		<link href="immo-search.css" rel="stylesheet">
+		<script src="../src/common.js" defer></script>
+		<script src="../src/options-manager.js" defer></script>
+	</head>
+	<body>
+		<h1>ImmoSearch</h1>
+
+		<button id="save-options">Speichern</button>
+		<button id="reset-options">Zurücksetzen</button>
+		<button id="clear-data">Alle Daten löschen</button>
+
+		<div class="row">
+			<section class="col">
+				<h2>Angezeigte Daten</h2>
+				<ol id="selected-keys"></ol>
+			</section>
+
+			<section class="col" id="middle-col">
+				<h2>Verfügbare Daten</h2>
+				<ul id="available-keys"></ul>
+			</section>
+
+			<section class="col">
+				<details>
+					<summary>
+						<h2>Gespeicherte Daten</h2>
+					</summary>
+					<table id="stored-data">
+						<thead>
+							<tr>
+								<th>Key</th>
+								<th>Value</th>
+							</tr>
+						</thead>
+						<tbody>
+						</tbody>
+					</table>
+				</details>
+			</section>
+		</div>
+
+		<footer>
+			<address>
+				Contact: <a href="mailto:janpublicebert@posteo.net">janpublicebert@posteo.net</a>
+			</address>
+		</footer>
+	</body>
+</html>

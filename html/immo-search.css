@@ -1,0 +1,31 @@
+body {
+	font-family: sans-serif;
+	padding: 0 1em;
+}
+
+.row {
+	display: flex;
+}
+
+.col {
+	flex: 1;
+}
+
+#middle-col {
+	 margin: 0.5rem 1rem;
+	 padding: 0 1rem;
+	 border-left: 2px black solid;
+	 border-right: 2px black solid;
+}
+
+td {
+	padding: 0.5rem 1rem;
+	border-top: 2px black solid;
+}
+
+#selected-keys, #available-keys {
+	max-height: 80vh;
+	min-width: 20vh;
+	max-width: 40vh;
+	overflow: auto;
+}

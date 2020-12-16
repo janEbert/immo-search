@@ -16,6 +16,11 @@
 		}
 	},
 
+	"options_ui": {
+		"page": "html/index.html",
+		"open_in_tab": true
+	},
+
 	"content_scripts": [
 		{
 			"matches": ["*://www.immobilienscout24.de/expose/*"],
