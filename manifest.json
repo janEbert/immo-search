@@ -10,6 +10,12 @@
 
 	"permissions": ["storage"],
 
+	"browser_specific_settings": {
+		"gecko": {
+			"id": "immo-search@jan-ebert.com"
+		}
+	},
+
 	"content_scripts": [
 		{
 			"matches": ["*://www.immobilienscout24.de/expose/*"],
