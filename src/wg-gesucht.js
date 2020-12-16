@@ -330,7 +330,8 @@ async function enhanceWGG() {
 
 async function main() {
 	if (document.getElementById("WG-Pictures") === null
-		&& document.getElementById("noImagesTeaser") === null) {
+		&& document.getElementById("noImagesTeaser") === null
+		&& document.getElementById("freitext_0_content") === null) {
 		console.log("We are not on an individual listing page.");
 		return;
 	}
