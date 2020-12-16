@@ -113,6 +113,17 @@ function parseMainCriteriaDiv(mainCriteriaDiv, parsedData) {
 }
 
 
+function parseCriteriaTagDiv(criteriaTagDiv, parsedData, tagTranslations) {
+	const tagText = criteriaTagDiv.innerText;
+	if (!Object.prototype.hasOwnProperty.call(tagTranslations, tagText)) {
+		console.log("WARNING: Unknown tag '" + tagText + "'. Skipping...");
+		return;
+	}
+
+	parsedData[tagTranslations[tagText]] = true;
+}
+
+
 function parseCriteriaTagsDiv(criteriaTagsDiv, parsedData) {
 	const tagTranslations = {
 		"Keller": "hasCellar",
@@ -122,27 +133,9 @@ function parseCriteriaTagsDiv(criteriaTagsDiv, parsedData) {
 		"Garten/ -mitbenutzung": "hasGarden",
 	};
 
-	for (const child of criteriaTagsDiv.children) {
-		const tagText = child.innerText;
-		if (!Object.prototype.hasOwnProperty.call(tagTranslations, tagText)) {
-			console.log("WARNING: Unknown tag '" + tagText + "'. Skipping...");
-			continue;
-		}
-
-		parsedData[tagTranslations[tagText]] = true;
+	for (const criteriaTagDiv of criteriaTagsDiv.children) {
+		parseCriteriaTagDiv(criteriaTagDiv, parsedData, tagTranslations);
 	}
-}
-
-
-function fillOptionalTagKeys(parsedData) {
-	const keys = [
-		"cellar",
-		"elevator",
-		"kitchen",
-		"balcony",
-		"garden",
-	];
-	fillOptionalKeys(parsedData, keys);
 }
 
 
@@ -170,6 +163,8 @@ function parseFloorLevel(floorLevelGroupDiv, parsedData) {
 	// Floor Level (class "is24qa-etage")
 	const floorLevelDd = floorLevelTitleDiv.nextElementSibling;
 	// May be something like "3 von 4"
+	const floorLevel = floorLevelDd.innerText;
+	parsedData.floorLevel = floorLevel;
 
 	return floorLevelGroupDiv;
 }
@@ -295,24 +290,11 @@ function parseParkingSpots(parkingSpotsGroupDiv, parsedData) {
 }
 
 
-function parseOptionalRemainingInformation(startNode, parsedData) {
+function parseOptionalRemainingInformation(startNode, parsedData, switcher) {
 	if (startNode === null || startNode.firstElementChild === null
 		|| startNode.tagName.toLowerCase() !== "dl") {
 		return startNode;
 	}
-
-	const switcher = {
-		"class-is24qa-typ-label": parseEstateType,
-		"class-is24qa-etage-label": parseFloorLevel,
-		"class-is24qa-wohnflaeche-label": parseLivingArea,
-		"class-is24qa-nutzflaeche-label": parseUsableArea,
-		"class-is24qa-bezugsfrei-ab-label": parseAvailableFromDate,
-		"class-is24qa-zimmer-label": parseNumRooms,
-		"class-is24qa-badezimmer-label": parseNumBathrooms,
-		"class-is24qa-schlafzimmer-label": parseNumBedrooms,
-		"class-is24qa-haustiere-label": parsePetPolicy,
-		"class-is24qa-garage-stellplatz-label": parseParkingSpots,
-	};
 
 	const firstChild = startNode.firstElementChild;
 	if (firstChild.hasAttribute("id")) {
@@ -334,18 +316,45 @@ function parseOptionalRemainingInformation(startNode, parsedData) {
 }
 
 
+function parseOptionalRemainingInformation(
+	firstOptionalRemainingInformation,
+	parsedData
+) {
+	const switcher = {
+		"class-is24qa-typ-label": parseEstateType,
+		"class-is24qa-etage-label": parseFloorLevel,
+		"class-is24qa-wohnflaeche-label": parseLivingArea,
+		"class-is24qa-nutzflaeche-label": parseUsableArea,
+		"class-is24qa-bezugsfrei-ab-label": parseAvailableFromDate,
+		"class-is24qa-zimmer-label": parseNumRooms,
+		"class-is24qa-badezimmer-label": parseNumBathrooms,
+		"class-is24qa-schlafzimmer-label": parseNumBedrooms,
+		"class-is24qa-haustiere-label": parsePetPolicy,
+		"class-is24qa-garage-stellplatz-label": parseParkingSpots,
+	};
+
+	let currentNode = firstOptionalRemainingInformation;
+	while (currentNode !== null) {
+		const previousSibling = parseOptionalRemainingInformation(
+			currentNode,
+			parsedData,
+			switcher,
+		);
+		currentNode = previousSibling.nextElementSibling;
+	}
+}
+
+
 function parseRemainingInformationDiv(remainingInformationDiv, parsedData) {
 	// Estate Overview (Type, Availability Date, Detailed Room Listing, ...)
 	const estateOverviewDiv = remainingInformationDiv.firstElementChild;
 
-	let currentNode = estateOverviewDiv.firstElementChild;
-	while (currentNode !== null) {
-		const previousSibling = parseOptionalRemainingInformation(
-			currentNode,
-			parsedData
-		);
-		currentNode = previousSibling.nextElementSibling;
-	}
+	const firstOptionalRemainingInformation = estateOverviewDiv
+		  .firstElementChild;
+	parseOptionalRemainingInformation(
+		firstOptionalRemainingInformation,
+		parsedData
+	);
 
 	// Internet Speed
 	const internetSpeedDiv = estateOverviewDiv.nextElementSibling;

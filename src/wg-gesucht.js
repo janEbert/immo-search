@@ -153,8 +153,153 @@ function parseEstateOverviewDiv(estateOverviewDiv, parsedData) {
 }
 
 
-function parseAmenitiesOverviewDiv(amenitiesOverviewDiv, parsedData) {
-	// TODO
+function storeAttributeCallback(attribute) {
+	return function (parsedData, value) {
+		parsedData[attribute] = value;
+	};
+}
+
+
+function storeBooleanTagCallback(tagAttribute) {
+	return function (parsedData) {
+		parsedData[tagAttribute] = true;
+	};
+}
+
+
+function parseHasKitchen(parsedData, text) {
+	if (text === "Nicht vorhanden") {
+		return;
+	}
+	parsedData.hasKitchen = true;
+}
+
+
+function parseAmenity(amenity, parsedData, amenityTranslations) {
+	if (!Object.prototype.hasOwnProperty.call(amenityTranslations,
+											  amenity)) {
+		console.log("WARNING: Unknown amenity '" + amenity
+					+ "'. Skipping...");
+		return;
+	}
+
+	parsedData[amenityTranslations[amenity]] = true;
+}
+
+
+function parseAmenities(parsedData, text) {
+	const amenityTranslations = {
+		"Waschmaschine": "hasWashingMachine",
+		"Spülmaschine": "hasDishWasher",
+		"Keller": "hasCellar",
+		"Fahrradkeller": "hasBicycleStorage",
+		// TODO check names
+		// "Personenaufzug": "hasElevator",
+		// "Balkon/ Terrasse": "hasBalcony",
+		// "Garten/ -mitbenutzung": "hasGarden",
+	};
+
+	console.log("debug amenities ", text);
+	for (const amenity of text.split(", ")) {
+		parseAmenity(amenity, parsedData, amenityTranslations);
+	}
+}
+
+
+function parseCriteriaTagListItemDiv(
+	criteriaTagListItemDiv,
+	criteriaTagGroupDiv,
+	parsedData,
+	switcher,
+) {
+	if (criteriaTagGroupDiv === null
+		|| !criteriaTagGroupDiv.hasAttribute("class")
+		|| criteriaTagGroupDiv.classList.length < 2) {
+		return;
+	}
+
+	const secondClass = criteriaTagGroupDiv.classList[1];
+	console.log("debug " + secondClass);
+	if (secondClass === "glyphicons-info-sign") {
+		const nextSibling = criteriaTagGroupDiv.nextElementSibling;
+		if (nextSibling !== null
+			&& nextSibling.hasAttribute("class")
+			&& nextSibling.classList.length >= 2
+			&& Object.prototype.hasOwnProperty.call(
+				switcher,
+				nextSibling.classList[1]
+			)) {
+
+			parseCriteriaTagListItemDiv(
+				criteriaTagListItemDiv,
+				nextSibling,
+				parsedData,
+				switcher,
+			);
+			return;
+		}
+	}
+	console.log("debug 2 " + secondClass);
+
+	if (!Object.prototype.hasOwnProperty.call(switcher, secondClass)) {
+		console.log("WARNING: Unknown tag '" + secondClass + "'. Skipping...");
+		return;
+	}
+
+	const moreThanTag = criteriaTagGroupDiv.innerText;
+	const tagText = moreThanTag.trim();
+
+	console.log("debug 3 " + secondClass);
+	switcher[secondClass](parsedData, tagText);
+	console.log("debug 4 " + secondClass);
+}
+
+
+function parseCriteriaTagsOverviewDiv(criteriaTagsOverviewDiv, parsedData) {
+	const switcher = {
+		// e.g. "WG geeignet"
+		// "glyphicons-group": null
+		// e.g. "Mehrfamilienhaus" or "sanierter Altbau"
+		"glyphicons-mixed-buildings": storeAttributeCallback("estateType"),
+		// e.g. "2. OG"
+		"glyphicons-building": storeAttributeCallback("floorLevel"),
+		// e.g. "teilmöbliert"
+		"glyphicons-bed": storeAttributeCallback("availableFurniture"),
+		// e.g. "Eigene Küche" or "Nicht vorhanden"
+		"glyphicons-dining-set": parseHasKitchen,
+		// e.g. "Badewanne" or "Eigenes Bad, Dusche"
+		// "glyphicons-bath-bathtub": null,
+		// e.g. "Kabel"
+		// "glyphicons-display": null,
+		// e.g. "Laminat, Fliesen"
+		// "glyphicons-fabric": null,
+		// e.g. "Fernwärme"
+		// "glyphicons-fire": null,
+		// e.g. "gute Parkmöglichkeiten", "Bewohnerparken"
+		"glyphicons-car": storeAttributeCallback("parkingSpots"),
+		// e.g. "2 Minuten zu Fuß entfernt"
+		// "glyphicons-bus": null,
+		// e.g. "Waschmaschine, Keller, Fahrradkeller"
+		"glyphicons-folder-closed": parseAmenities,
+		// "Eigene Küche": storeBooleanTagCallback("hasKitchen"),
+		// "Keller": storeBooleanTagCallback("hasCellar"),
+		// "Personenaufzug": storeBooleanTagCallback("hasElevator"),
+		// "Balkon/ Terrasse": storeBooleanTagCallback("hasBalcony"),
+		// "Garten/ -mitbenutzung": storeBooleanTagCallback("hasGarden"),
+	};
+
+	let criteriaTagsDiv = criteriaTagsOverviewDiv.firstElementChild
+		.firstElementChild
+		.nextElementSibling;
+
+	for (const criteriaTagListItemDiv of criteriaTagsDiv.children) {
+		parseCriteriaTagListItemDiv(
+			criteriaTagListItemDiv,
+			criteriaTagListItemDiv.firstElementChild,
+			parsedData,
+			switcher,
+		);
+	}
 }
 
 
@@ -282,15 +427,15 @@ async function parseContentDiv(contentDiv, parsedData) {
 		  .nextElementSibling;
 	parseEstateOverviewDiv(estateOverviewDiv, parsedData);
 
-	const amenitiesOverviewDiv = estateOverviewDiv.nextElementSibling
+	const criteriaTagsOverviewDiv = estateOverviewDiv.nextElementSibling
 		  .nextElementSibling
 		  .nextElementSibling
 		  .nextElementSibling
 		  .nextElementSibling
 		  .nextElementSibling;
-	parseAmenitiesOverviewDiv(amenitiesOverviewDiv, parsedData);
+	parseCriteriaTagsOverviewDiv(criteriaTagsOverviewDiv, parsedData);
 
-	const descriptionOverviewDiv = amenitiesOverviewDiv.nextElementSibling
+	const descriptionOverviewDiv = criteriaTagsOverviewDiv.nextElementSibling
 		  .nextElementSibling;
 	// parseDescriptionOverviewDiv(descriptionOverviewDiv, parsedData);
 	parseDescriptions(parsedData);

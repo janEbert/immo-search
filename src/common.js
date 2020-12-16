@@ -4,6 +4,7 @@
 class ParsedData {
 	constructor() {
 		this.site = "";
+		this.retrievalDate = new Date().toISOString();
 		this.title = "";
 		this.id = "";
 		// Called Object ID at ImmoScout24; does not exist for every real estate
@@ -13,6 +14,9 @@ class ParsedData {
 		this.availableFromDate = "";
 		this.availableUntilDate = "";
 		// TODO check whether trade offer
+		this.floorLevel = "";
+
+		// Misc
 
 		// Location
 		this.addressStreet = "";
@@ -48,6 +52,10 @@ class ParsedData {
 		this.hasKitchen = "";
 		this.hasBalcony = "";
 		this.hasGarden = "";
+		this.hasWashingMachine = "";
+		this.hasDishWasher = "";
+		this.hasBicycleStorage = "";
+		this.availableFurniture = "";
 		this.petPolicy = "";
 		this.parkingSpots = "";
 
@@ -58,6 +66,7 @@ class ParsedData {
 		this.miscDescription = "";
 
 		// Calculated later
+		this.url = "";
 		this.coldRentPerArea = "";
 		this.totalRentPerArea = "";
 		this.additionalCosts = "";
@@ -66,6 +75,8 @@ class ParsedData {
 	}
 
 	calculateRemaining() {
+		this.url = this.getUrl();
+
 		this.coldRentPerArea = this.coldRent / this.floorArea;
 		this.totalRentPerArea = this.totalRent / this.floorArea;
 		this.additionalCosts = this.totalRent - this.coldRent;
@@ -80,6 +91,14 @@ class ParsedData {
 
 	formatSite() {
 		return ["Seite", this.site];
+	}
+
+	formatUrl() {
+		return ["URL", this.url];
+	}
+
+	formatRetrievalDate() {
+		return ["Abgerufen am", isoDateToGerman(this.retrievalDate)];
 	}
 
 	formatTitle() {
@@ -104,6 +123,10 @@ class ParsedData {
 
 	formatAvailableUntilDate() {
 		return ["Verfügbar bis", isoDateToGerman(this.availableUntilDate)];
+	}
+
+	formatFloorLevel() {
+		return ["Etage", this.floorLevel];
 	}
 
 	formatAddressStreet() {
@@ -199,7 +222,7 @@ class ParsedData {
 	}
 
 	formatCompensationCostsUnit() {
-		return ["Ablösevereinbahrung", this.compensationCostsUnit];
+		return ["Ablösevereinbahrung Einheit", this.compensationCostsUnit];
 	}
 
 	formatFloorArea() {
@@ -234,23 +257,39 @@ class ParsedData {
 	}
 
 	formatHasCellar() {
-		return ["Keller", this.hasCellar ? "Ja" : "Nein"];
+		return ["Keller", formatBoolean(this.hasCellar)];
 	}
 
 	formatHasElevator() {
-		return ["Lift", this.hasElevator ? "Ja" : "Nein"];
+		return ["Lift", formatBoolean(this.hasElevator)];
 	}
 
 	formatHasKitchen() {
-		return ["Küche", this.hasKitchen ? "Ja" : "Nein"];
+		return ["Küche", formatBoolean(this.hasKitchen)];
 	}
 
 	formatHasBalcony() {
-		return ["Balkon", this.hasBalcony ? "Ja" : "Nein"];
+		return ["Balkon", formatBoolean(this.hasBalcony)];
 	}
 
 	formatHasGarden() {
-		return ["Garten", this.hasGarden ? "Ja" : "Nein"];
+		return ["Garten", formatBoolean(this.hasGarden)];
+	}
+
+	formatHasWashingMachine() {
+		return ["Waschmaschine", formatBoolean(this.hasWashingMachine)];
+	}
+
+	formatHasDishWasher() {
+		return ["Spülmaschine", formatBoolean(this.hasDishWasher)];
+	}
+
+	formatHasBicycleStorage() {
+		return ["Fahrradkeller", formatBoolean(this.hasBicycleStorage)];
+	}
+
+	formatAvailableFurniture() {
+		return ["Möblierung", formatBoolean(this.hasAvailableFurniture)];
 	}
 
 	formatPetPolicy() {
@@ -305,8 +344,8 @@ class ParsedData {
 			+ "</style>";
 	}
 
-	toDefaultHtmlTable() {
-		const keys = [
+	defaultShownKeys() {
+		return [
 			"title",
 			"region",
 			"coldRent",
@@ -323,6 +362,25 @@ class ParsedData {
 			"locationDescription",
 			"miscDescription",
 		];
+	}
+
+	async toDefaultHtmlTable() {
+		const keys = await loadData("selectedKeys").then(
+			(storedData) => {
+				if (Object.keys(storedData).length === 0) {
+					keys = this.defaultShownKeys();
+					return keys;
+				}
+
+				keys = storedData.selectedKeys;
+				return keys;
+			},
+			(error) => {
+				console.log("Load error: " + error);
+				keys = this.defaultShownKeys();
+				return keys;
+			}
+		);
 		return this.toHtmlTable(keys);
 	}
 
@@ -399,11 +457,11 @@ class ParsedData {
 			return null;
 		}
 
-		return urlSwitcher[this.site]();
+		return urlSwitcher[this.site].bind(this)();
 	}
 
 	getStorageKey() {
-		return this.site + "/" + this.id;
+		return "i-" + this.site + "/" + this.id;
 	}
 }
 
@@ -454,16 +512,27 @@ function parseGermanDecimal(commaText) {
 
 
 function roundPrice(price) {
+	if (price === "") {
+		return "";
+	}
 	return parseFloat(price.toFixed(2), 10);
 }
 
 
 function formatPrice(price) {
+	if (price === "") {
+		return "";
+	}
 	const roundedPrice = roundPrice(price);
 	if (roundedPrice === 0) {
 		return "0";
 	}
 	return roundedPrice.toFixed(2);
+}
+
+
+function formatBoolean(bool) {
+	return bool ? "Ja" : "Nein";
 }
 
 
@@ -481,7 +550,15 @@ function germanDateToIso(date) {
 
 
 function isoDateToGerman(date) {
-	return date.split("-").reverse().join(".");
+	if (date.length < 10) {
+		return date.split("-").reverse().join(".");
+	}
+
+	const year = date.slice(0, 4);
+	const month = date.slice(5, 7);
+	const day = date.slice(8, 10);
+	const time = date.slice(11, 19);
+	return day + "." + month + "." + year + " " + time + " UTC";
 }
 
 
@@ -504,6 +581,11 @@ function loadData(keys) {
 }
 
 
+function removeData(keys) {
+	return browser.storage.local.remove(keys);
+}
+
+
 function insertResult(resultText, parentNode, nextSibling, tag) {
 	const resultNode = document.createElement(tag || "p");
 	resultNode.innerHTML = resultText;
@@ -518,10 +600,43 @@ function insertResult(resultText, parentNode, nextSibling, tag) {
 
 function createDetailsNode(summaryText) {
 	const detailsNode = document.createElement("details");
+	detailsNode.style.marginBottom = "2rem";
 	const summaryNode = document.createElement("summary");
 	summaryNode.innerHTML = summaryText;
 	detailsNode.appendChild(summaryNode);
 	return detailsNode;
+}
+
+
+function createRemoveButton(parsedData, label, storeButton) {
+	const button = document.createElement("button");
+	button.innerHTML = label;
+	button.style.padding = "2px";
+	button.style.marginBottom = "1rem";
+
+	button.addEventListener("click", function() {
+		removeData(parsedData.getStorageKey()).then(
+			() => {
+				console.log("Removed data");
+				button.remove();
+				storeButton.innerText = "Anzeige speichern";
+			},
+			(error) => console.log("Error removing data: " + error)
+		);
+	});
+	return button;
+}
+
+
+function insertRemoveButton(parsedData, storeButton) {
+	const removeButton = createRemoveButton(
+		parsedData,
+		"Anzeige löschen",
+		storeButton,
+	);
+
+	const parentNode = storeButton.parentElement;
+	parentNode.insertBefore(removeButton, storeButton.nextElementSibling);
 }
 
 
@@ -536,6 +651,7 @@ function createStoreButton(parsedData, label) {
 			() => {
 				console.log("Stored data");
 				button.innerHTML = "Gespeichert";
+				insertRemoveButton(parsedData, button);
 			},
 			(error) => console.log("Error storing data: " + error)
 		);
@@ -546,7 +662,14 @@ function createStoreButton(parsedData, label) {
 
 function insertStoreButton(label, parsedData, parentNode) {
 	const storeButton = createStoreButton(parsedData, label);
-	parentNode.insertBefore(storeButton, parentNode.firstElementChild);
+	return parentNode.insertBefore(storeButton, parentNode.firstElementChild);
+}
+
+
+function deleteChildren(element) {
+	while (element.firstElementChild !== null) {
+		element.firstElementChild.remove();
+	}
 }
 
 
@@ -579,7 +702,12 @@ async function displayData(parsedData, parentNode) {
 				return;
 			}
 
-			insertStoreButton("Gespeichert", parsedData, parentNode);
+			const storeButton = insertStoreButton(
+				"Gespeichert",
+				parsedData,
+				parentNode,
+			);
+			insertRemoveButton(parsedData, storeButton);
 		},
 		(error) => {
 			console.log("Load error: " + error);
@@ -599,4 +727,3 @@ async function displayData(parsedData, parentNode) {
 // 	germanDateToIso,
 // 	displayData
 // };
-
