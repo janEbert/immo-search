@@ -17,9 +17,10 @@ on the text and it will be copied to your clipboard.
 
 ### Temporary
 
-Navigate to `about:debugging#/runtime/this-firefox` and select "Load
-Temporary Add-on...". Then select the [manifest.json](./manifest.json)
-file in this repository's root.
+1. Navigate to `about:debugging#/runtime/this-firefox`.
+2. Select "Load Temporary Add-on...".
+3. Then select the [manifest.json](./manifest.json) file in this
+   repository's root.
 
 ### Persistent
 
@@ -28,16 +29,16 @@ file in this repository's root.
 You should not do this and instead wait for signed releases.
 </summary>
 
-Go to `about:config` and set `xpinstall.signatures.required` to `false`.
+1. Go to `about:config` and set `xpinstall.signatures.required` to `false`.
 
-Zip the repository's root folder:
-```shell
-zip -r -FS immo-search.xpi * --exclude '*.git*'
-```
+2. Zip the repository's root folder:
+   ```shell
+   zip -r -FS immo-search.xpi * --exclude '*.git*'
+   ```
 
-Then navigate to `about:addons`, click on the gears icon and select
-"Install Add-on From File...". Finally, select the immo-search.xpi
-file you created.
+3. Then navigate to `about:addons`, click on the gears icon and select
+   "Install Add-on From File...". Finally, select the immo-search.xpi
+   file you created.
 </details>
 
 ## Websites
