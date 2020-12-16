@@ -50,13 +50,13 @@ You should not do this and instead wait for signed releases.
    file you created.
 </details>
 
-## Websites
+## Supported Websites
 
 Currently works with
 - [immobilienscout24.de](https://immobilienscout24.de)
 - [wg-gesucht.de](https://wg-gesucht.de)
 
-## Further notes
+## Further Notes
 
 Not all functionality is implemented; this is more a proof of concept.
 
