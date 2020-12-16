@@ -1,7 +1,6 @@
 // Common functions for parsing and displaying parsed information on
 // real estate listing sites.
 
-
 class ParsedData {
 	constructor() {
 		this.site = "";
@@ -496,7 +495,12 @@ function registerClipboard(element) {
 function storeData(parsedData) {
 	const storeObject = {};
 	storeObject[parsedData.getStorageKey()] = parsedData;
-	browser.storage.local.set(storeObject);
+	return browser.storage.local.set(storeObject);
+}
+
+
+function loadData(keys) {
+	return browser.storage.local.get(keys);
 }
 
 
@@ -521,20 +525,32 @@ function createDetailsNode(summaryText) {
 }
 
 
-function createStoreButton(parsedData) {
+function createStoreButton(parsedData, label) {
 	const button = document.createElement("button");
-	button.innerHTML = "Anzeige speichern";
+	button.innerHTML = label;
 	button.style.padding = "2px";
 	button.style.marginBottom = "1rem";
 
 	button.addEventListener("click", function() {
-		storeData(parsedData);
+		storeData(parsedData).then(
+			() => {
+				console.log("Stored data");
+				button.innerHTML = "Gespeichert";
+			},
+			(error) => console.log("Error storing data: " + error)
+		);
 	});
 	return button;
 }
 
 
-function displayData(parsedData, parentNode) {
+function insertStoreButton(label, parsedData, parentNode) {
+	const storeButton = createStoreButton(parsedData, label);
+	parentNode.insertBefore(storeButton, parentNode.firstElementChild);
+}
+
+
+async function displayData(parsedData, parentNode) {
 	const detailsNode = createDetailsNode("> Daten zur Verarbeitung...");
 	const detailsChildNode = document.createElement("div");
 	detailsChildNode.style.marginTop = "2rem";
@@ -556,8 +572,20 @@ function displayData(parsedData, parentNode) {
 	tableContainer.innerHTML = resultTable;
 	parentNode.insertBefore(tableContainer, parentNode.firstElementChild);
 
-	const storeButton = createStoreButton(parsedData);
-	parentNode.insertBefore(storeButton, parentNode.firstElementChild);
+	loadData(parsedData.getStorageKey()).then(
+		(storedData) => {
+			if (Object.keys(storedData).length === 0) {
+				insertStoreButton("Anzeige speichern", parsedData, parentNode);
+				return;
+			}
+
+			insertStoreButton("Gespeichert", parsedData, parentNode);
+		},
+		(error) => {
+			console.log("Load error: " + error);
+			insertStoreButton("Anzeige speichern", parsedData, parentNode);
+		}
+	);
 }
 
 
