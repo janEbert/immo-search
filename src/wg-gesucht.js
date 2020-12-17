@@ -208,15 +208,14 @@ function parseAmenities(parsedData, text) {
 	const amenityTranslations = {
 		"Waschmaschine": storeBooleanTagCallback("hasWashingMachine"),
 		"Spülmaschine": storeBooleanTagCallback("hasDishWasher"),
+		"Balkon": storeBooleanTagCallback("hasBalcony"),
 		"Terrasse": storeBooleanTagCallback("hasBalcony"),
-		// "Balkon": "hasBalcony",
 		"Garten": storeBooleanTagCallback("hasGarden"),
 		"Gartenmitbenutzung": storeBooleanTagCallback("hasGarden"),
 		"Keller": storeBooleanTagCallback("hasCellar"),
 		"Fahrradkeller": storeBooleanTagCallback("hasBicycleStorage"),
 		"Haustiere erlaubt": storeAttributeCallback("petPolicy"),
-		// TODO check names
-		// "Personenaufzug": "hasElevator",
+		"Aufzug": storeBooleanTagCallback("hasElevator"),
 	};
 
 	for (const amenity of text.split(", ")) {
