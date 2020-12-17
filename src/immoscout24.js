@@ -345,6 +345,19 @@ function parseOptionalRemainingInformationList(
 }
 
 
+function maybeParseInternetSpeedDiv(internetSpeedDiv, parsedData) {
+	// Internet Speed may be missing
+	if (document.getElementById("expose-media-availability-container")
+		=== null) {
+		// We skip over a script tag
+		return internetSpeedDiv.nextElementSibling;
+	}
+
+	// We skip over a script tag
+	return internetSpeedDiv.nextElementSibling.nextElementSibling;
+}
+
+
 function parseRemainingInformationDiv(remainingInformationDiv, parsedData) {
 	// Estate Overview (Type, Availability Date, Detailed Room Listing, ...)
 	const estateOverviewDiv = remainingInformationDiv.firstElementChild;
@@ -356,13 +369,11 @@ function parseRemainingInformationDiv(remainingInformationDiv, parsedData) {
 		parsedData
 	);
 
-	// Internet Speed
-	const internetSpeedDiv = estateOverviewDiv.nextElementSibling;
-
 	// Premium Stats
-	// We skip over a script tag
-	const premiumStatsDiv = internetSpeedDiv.nextElementSibling
-		  .nextElementSibling;
+	const premiumStatsDiv = maybeParseInternetSpeedDiv(
+		estateOverviewDiv.nextElementSibling,
+		parsedData,
+	);
 
 	// Cost Overview
 	const costOverviewTitleDiv = premiumStatsDiv.nextElementSibling;
