@@ -18,6 +18,11 @@ function findMoreThanTitleDiv(titlePhotoDiv) {
 		return noPicturesTitleDiv.firstElementChild;
 	}
 
+	const unloadedPicturesTitleDiv = document.getElementById("sliderTopTitle");
+	if (unloadedPicturesTitleDiv !== null) {
+		return unloadedPicturesTitleDiv;
+	}
+
 	const titlePhotoGroupDiv = titlePhotoDiv.firstElementChild
 		.nextElementSibling
 		.nextElementSibling
