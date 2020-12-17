@@ -614,6 +614,7 @@ function createRemoveButton(parsedData, label, storeButton) {
 	button.innerHTML = label;
 	button.style.padding = "2px";
 	button.style.marginBottom = "1rem";
+	button.style.marginLeft = "1rem";
 
 	button.addEventListener("click", function() {
 		removeData(parsedData.getStorageKey()).then(
