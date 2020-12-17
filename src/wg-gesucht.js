@@ -200,21 +200,21 @@ function parseAmenity(amenity, parsedData, amenityTranslations) {
 		return;
 	}
 
-	parsedData[amenityTranslations[amenity]] = true;
+	amenityTranslations[amenity](parsedData, amenity);
 }
 
 
 function parseAmenities(parsedData, text) {
 	const amenityTranslations = {
-		"Waschmaschine": "hasWashingMachine",
-		"Spülmaschine": "hasDishWasher",
-		"Terrasse": "hasBalcony",
+		"Waschmaschine": storeBooleanTagCallback("hasWashingMachine"),
+		"Spülmaschine": storeBooleanTagCallback("hasDishWasher"),
+		"Terrasse": storeBooleanTagCallback("hasBalcony"),
 		// "Balkon": "hasBalcony",
-		"Garten": "hasGarden",
-		"Gartenmitbenutzung": "hasGarden",
-		"Keller": "hasCellar",
-		"Fahrradkeller": "hasBicycleStorage",
-		"Haustiere erlaubt": "petPolicy",
+		"Garten": storeBooleanTagCallback("hasGarden"),
+		"Gartenmitbenutzung": storeBooleanTagCallback("hasGarden"),
+		"Keller": storeBooleanTagCallback("hasCellar"),
+		"Fahrradkeller": storeBooleanTagCallback("hasBicycleStorage"),
+		"Haustiere erlaubt": storeAttributeCallback("petPolicy"),
 		// TODO check names
 		// "Personenaufzug": "hasElevator",
 	};
