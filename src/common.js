@@ -551,7 +551,7 @@ function germanDateToIso(date) {
 
 
 function isoDateToGerman(date) {
-	if (date.length < 10) {
+	if (date.length <= 10) {
 		return date.split("-").reverse().join(".");
 	}
 

@@ -153,6 +153,23 @@ function parseEstateOverviewDiv(estateOverviewDiv, parsedData) {
 }
 
 
+function parseOptionalFlatOverview(estateOverviewDiv) {
+	const maybeSharedFlatOverviewDiv = estateOverviewDiv.nextElementSibling
+		  .nextElementSibling
+		  .nextElementSibling
+		  .nextElementSibling
+		  .nextElementSibling
+		  .nextElementSibling;
+	const maybeSharedFlatTitleGroupDiv = maybeSharedFlatOverviewDiv.firstElementChild;
+
+	if (maybeSharedFlatTitleGroupDiv.innerText.trim() !== "WG-Details") {
+		return maybeSharedFlatOverviewDiv;
+	}
+
+	return maybeSharedFlatOverviewDiv.nextElementSibling.nextElementSibling;
+}
+
+
 function storeAttributeCallback(attribute) {
 	return function (parsedData, value) {
 		parsedData[attribute] = value;
@@ -191,12 +208,15 @@ function parseAmenities(parsedData, text) {
 	const amenityTranslations = {
 		"Waschmaschine": "hasWashingMachine",
 		"Spülmaschine": "hasDishWasher",
+		"Terrasse": "hasBalcony",
+		// "Balkon": "hasBalcony",
+		"Garten": "hasGarden",
+		"Gartenmitbenutzung": "hasGarden",
 		"Keller": "hasCellar",
 		"Fahrradkeller": "hasBicycleStorage",
+		"Haustiere erlaubt": "petPolicy",
 		// TODO check names
 		// "Personenaufzug": "hasElevator",
-		// "Balkon/ Terrasse": "hasBalcony",
-		// "Garten/ -mitbenutzung": "hasGarden",
 	};
 
 	for (const amenity of text.split(", ")) {
@@ -252,6 +272,8 @@ function parseCriteriaTagListItemDiv(
 
 function parseCriteriaTagsOverviewDiv(criteriaTagsOverviewDiv, parsedData) {
 	const switcher = {
+		// e.g. "Bedarfsausweis, Gas, Baujahr 1990, Energieeffizienzklasse B"
+		// "glyphicons-electricity": null
 		// e.g. "WG geeignet"
 		// "glyphicons-group": null
 		// e.g. "Mehrfamilienhaus" or "sanierter Altbau"
@@ -264,10 +286,14 @@ function parseCriteriaTagsOverviewDiv(criteriaTagsOverviewDiv, parsedData) {
 		"glyphicons-dining-set": parseHasKitchen,
 		// e.g. "Badewanne" or "Eigenes Bad, Dusche"
 		// "glyphicons-bath-bathtub": null,
+		// e.g. "DSL, Flatrate, WLAN schneller als 100 Mbit/s"
+		// "glyphicons-wifi-alt": null,
 		// e.g. "Kabel"
 		// "glyphicons-display": null,
 		// e.g. "Laminat, Fliesen"
 		// "glyphicons-fabric": null,
+		// e.g. "Ökostrom"
+		// "glyphicons-leaf": null,
 		// e.g. "Fernwärme"
 		// "glyphicons-fire": null,
 		// e.g. "gute Parkmöglichkeiten", "Bewohnerparken"
@@ -422,12 +448,8 @@ async function parseContentDiv(contentDiv, parsedData) {
 		  .nextElementSibling;
 	parseEstateOverviewDiv(estateOverviewDiv, parsedData);
 
-	const criteriaTagsOverviewDiv = estateOverviewDiv.nextElementSibling
-		  .nextElementSibling
-		  .nextElementSibling
-		  .nextElementSibling
-		  .nextElementSibling
-		  .nextElementSibling;
+	const criteriaTagsOverviewDiv = parseOptionalFlatOverview(estateOverviewDiv);
+
 	parseCriteriaTagsOverviewDiv(criteriaTagsOverviewDiv, parsedData);
 
 	const descriptionOverviewDiv = criteriaTagsOverviewDiv.nextElementSibling

@@ -316,7 +316,7 @@ function parseOptionalRemainingInformation(startNode, parsedData, switcher) {
 }
 
 
-function parseOptionalRemainingInformation(
+function parseOptionalRemainingInformationList(
 	firstOptionalRemainingInformation,
 	parsedData
 ) {
@@ -351,7 +351,7 @@ function parseRemainingInformationDiv(remainingInformationDiv, parsedData) {
 
 	const firstOptionalRemainingInformation = estateOverviewDiv
 		  .firstElementChild;
-	parseOptionalRemainingInformation(
+	parseOptionalRemainingInformationList(
 		firstOptionalRemainingInformation,
 		parsedData
 	);
