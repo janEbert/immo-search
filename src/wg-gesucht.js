@@ -199,7 +199,6 @@ function parseAmenities(parsedData, text) {
 		// "Garten/ -mitbenutzung": "hasGarden",
 	};
 
-	console.log("debug amenities ", text);
 	for (const amenity of text.split(", ")) {
 		parseAmenity(amenity, parsedData, amenityTranslations);
 	}
@@ -219,7 +218,6 @@ function parseCriteriaTagListItemDiv(
 	}
 
 	const secondClass = criteriaTagGroupDiv.classList[1];
-	console.log("debug " + secondClass);
 	if (secondClass === "glyphicons-info-sign") {
 		const nextSibling = criteriaTagGroupDiv.nextElementSibling;
 		if (nextSibling !== null
@@ -239,7 +237,6 @@ function parseCriteriaTagListItemDiv(
 			return;
 		}
 	}
-	console.log("debug 2 " + secondClass);
 
 	if (!Object.prototype.hasOwnProperty.call(switcher, secondClass)) {
 		console.log("WARNING: Unknown tag '" + secondClass + "'. Skipping...");
@@ -249,9 +246,7 @@ function parseCriteriaTagListItemDiv(
 	const moreThanTag = criteriaTagGroupDiv.innerText;
 	const tagText = moreThanTag.trim();
 
-	console.log("debug 3 " + secondClass);
 	switcher[secondClass](parsedData, tagText);
-	console.log("debug 4 " + secondClass);
 }
 
 
@@ -462,7 +457,6 @@ async function enhanceWGG() {
 	const contentDiv = document.getElementById("main_content");
 	await parseContentDiv(contentDiv, parsedData);
 
-	console.log("debug 7");
 	parsedData.calculateRemaining();
 	console.log(parsedData);
 	window.parsedData = parsedData;
