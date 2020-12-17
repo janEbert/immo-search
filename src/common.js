@@ -368,19 +368,20 @@ class ParsedData {
 		const keys = await loadData("selectedKeys").then(
 			(storedData) => {
 				if (Object.keys(storedData).length === 0) {
-					keys = this.defaultShownKeys();
+					const keys = this.defaultShownKeys();
 					return keys;
 				}
 
-				keys = storedData.selectedKeys;
+				const keys = storedData.selectedKeys;
 				return keys;
 			},
 			(error) => {
 				console.log("Load error: " + error);
-				keys = this.defaultShownKeys();
+				const keys = this.defaultShownKeys();
 				return keys;
 			}
 		);
+
 		return this.toHtmlTable(keys);
 	}
 
@@ -691,7 +692,7 @@ async function displayData(parsedData, parentNode) {
 	parentNode.insertBefore(detailsNode, parentNode.firstElementChild);
 
 	const tableContainer = document.createElement("p");
-	const resultTable = parsedData.toDefaultHtmlTable();
+	const resultTable = await parsedData.toDefaultHtmlTable();
 	tableContainer.innerHTML = resultTable;
 	parentNode.insertBefore(tableContainer, parentNode.firstElementChild);
 
