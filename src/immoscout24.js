@@ -66,6 +66,7 @@ function parseTitleAddressDiv(titleAddressDiv, parsedData) {
 		  .firstElementChild;
 
 	console.log("debug 2");
+	// FIXME can be postalInformationDiv if postalInformationDiv text is "\nDie vollständige Adresse der Immobilie erhalten Sie vom Anbieter."
 	const streetAddressDiv = addressDiv.firstElementChild;
 	// Remove comma at end
 	const addressStreetAndNumber = streetAddressDiv.innerText.slice(0, -1);
@@ -438,16 +439,20 @@ function parseObjectDescription(textualDescriptionTitleDiv, parsedData) {
 }
 
 
-function parseFloorPlan(floorPlanGroupDiv, parsedData) {
-	// Floor Plan Div (id "is24-ex-floorplans")
+function parseFloorPlanLinks(floorPlanListDiv, parsedData) {
+	// TODO only first link
+	const floorPlanLinkItem = floorPlanListDiv.firstElementChild;
+	const floorPlanLinkA = floorPlanLinkItem.firstElementChild
+		  .nextElementSibling;
+	const floorPlanLink = floorPlanLinkA.getAttribute("href");
+	const floorPlanLinkText = floorPlanLinkA.innerText;
+}
 
-	// Floor Plan Title
-	// innerText should be "Grundrisse"
-	const floorPlanTitle = floorPlanGroupDiv.firstElementChild;
+
+function parseFloorPlanImages(floorPlanGroupDiv, parsedData) {
 	// Floor Plan Images
 	// TODO only first image (don't know how to get others)
-	const floorPlanImages = floorPlanTitle.nextElementSibling
-		  .firstElementChild
+	const floorPlanImages = floorPlanGroupDiv.firstElementChild
 		  .firstElementChild
 		  .nextElementSibling
 		  .nextElementSibling
@@ -460,8 +465,28 @@ function parseFloorPlan(floorPlanGroupDiv, parsedData) {
 	if (!floorPlanImages.hasAttribute("src")) {
 		console.log("Wrong DOM walk towards floor plan image");
 	}
+}
 
-	return floorPlanGroupDiv;
+
+function parseFloorPlan(floorPlanOverviewDiv, parsedData) {
+	// Floor Plan Div (id "is24-ex-floorplans")
+
+	// Floor Plan Title
+	// innerText should be "Grundrisse"
+	const floorPlanTitle = floorPlanOverviewDiv.firstElementChild;
+
+	// Can be either link list or images
+	const floorPlanGroupDiv = floorPlanTitle.nextElementSibling;
+	const floorPlanListDiv = floorPlanGroupDiv.firstElementChild;
+
+	if (floorPlanListDiv.classList.length > 0
+		&& floorPlanListDiv.classList[0] === "is24-linklist") {
+		parseFloorPlanLinks(floorPlanListDiv, parsedData);
+	} else {
+		parseFloorPlanImages(floorPlanGroupDiv, parsedData);
+	}
+
+	return floorPlanOverviewDiv;
 }
 
 
