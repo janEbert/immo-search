@@ -361,6 +361,7 @@ class ParsedData {
 			"totalRentPerArea",
 			"additionalCosts",
 			"additionalCostsPerArea",
+			"floorArea",
 			"numRooms",
 			"availableFromDate",
 			"availableUntilDate",
