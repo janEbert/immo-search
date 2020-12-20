@@ -150,7 +150,10 @@ class ParsedData {
 	}
 
 	formatColdRent() {
-		return ["Kalt", this.coldRent + " " + this.formatColdRentUnit()[1]];
+		return [
+			"Kalt",
+			formatPrice(this.coldRent) + " " + this.formatColdRentUnit()[1]
+		];
 	}
 
 	formatColdRentPerArea() {
@@ -167,7 +170,10 @@ class ParsedData {
 	}
 
 	formatTotalRent() {
-		return ["Gesamt", this.totalRent + " " + this.formatTotalRentUnit()[1]];
+		return [
+			"Gesamt",
+			formatPrice(this.totalRent) + " " + this.formatTotalRentUnit()[1]
+		];
 	}
 
 	formatTotalRentPerArea() {
@@ -186,7 +192,8 @@ class ParsedData {
 	formatAdditionalCosts() {
 		return [
 			"NK",
-			this.additionalCosts + " " + this.formatAdditionalCostsUnit()[1]
+			formatPrice(this.additionalCosts)
+				+ " " + this.formatAdditionalCostsUnit()[1]
 		];
 	}
 
