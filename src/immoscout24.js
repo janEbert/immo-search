@@ -51,6 +51,16 @@ function parsePhotoContactIdDiv(photoContactIdDiv, parsedData) {
 }
 
 
+function parsePostalInformation(postalInformationDiv, parsedData) {
+	const postalInformation = postalInformationDiv.innerText;
+	const [postalCodeAndTown, region] = splitAt(postalInformation, ", ");
+	parsedData.region = region;
+	const [postalCode, town] = splitAt(postalCodeAndTown, " ");
+	parsedData.postalCode = postalCode;
+	parsedData.town = town;
+}
+
+
 function parseTitleAddressDiv(titleAddressDiv, parsedData) {
 	// Title
 	const titleDiv = titleAddressDiv.firstElementChild;
@@ -66,23 +76,24 @@ function parseTitleAddressDiv(titleAddressDiv, parsedData) {
 		  .firstElementChild;
 
 	console.log("debug 2");
-	// FIXME can be postalInformationDiv if postalInformationDiv text is "\nDie vollständige Adresse der Immobilie erhalten Sie vom Anbieter."
-	const streetAddressDiv = addressDiv.firstElementChild;
+	const maybeStreetAddressDiv = addressDiv.firstElementChild;
+	const maybePostalInformationDiv = maybeStreetAddressDiv.nextElementSibling;
+	if (maybePostalInformationDiv.innerText === "\nDie vollständige Adresse der "
+		+ "Immobilie erhalten Sie vom Anbieter.") {
+		parsePostalInformation(maybeStreetAddressDiv, parsedData);
+		return;
+	}
+
 	// Remove comma at end
-	const addressStreetAndNumber = streetAddressDiv.innerText.slice(0, -1);
+	const addressStreetAndNumber = maybeStreetAddressDiv.innerText.slice(0, -1);
 	const [addressStreet, addressNumber] = splitAtLast(
 		addressStreetAndNumber,
 		" "
 	);
 	parsedData.addressStreet = addressStreet;
 	parsedData.addressNumber = addressNumber;
-	const postalInformationDiv = streetAddressDiv.nextElementSibling;
-	const postalInformation = postalInformationDiv.innerText;
-	const [postalCodeAndTown, region] = splitAt(postalInformation, ", ");
-	parsedData.region = region;
-	const [postalCode, town] = splitAt(postalCodeAndTown, " ");
-	parsedData.postalCode = postalCode;
-	parsedData.town = town;
+
+	parsePostalInformation(maybePostalInformationDiv, parsedData);
 }
 
 
