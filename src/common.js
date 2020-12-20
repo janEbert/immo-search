@@ -532,10 +532,11 @@ function formatPrice(price) {
 		return "";
 	}
 	const roundedPrice = roundPrice(price);
-	if (roundedPrice === 0) {
-		return "0";
+	const formattedPrice = roundedPrice.toFixed(2);
+	if (formattedPrice.endsWith(".00")) {
+		return formattedPrice.slice(0, -3);
 	}
-	return roundedPrice.toFixed(2);
+	return formattedPrice;
 }
 
 
