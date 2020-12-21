@@ -511,17 +511,103 @@ async function enhanceWgg() {
 }
 
 
+function findSearchResultDiv(searchResult) {
+	const preSearchResultDiv = searchResult.nextElementSibling;
+	if (preSearchResultDiv.hasAttribute("id")
+		&& preSearchResultDiv.getAttribute("id")
+		.startsWith("liste-details-ad-")) {
+		const searchResultDiv = preSearchResultDiv.nextElementSibling;
+		return searchResultDiv;
+	}
+
+	return preSearchResultDiv.nextElementSibling.nextElementSibling;
+}
+
+
+function parseSearchResultDiv(searchResultDiv, parsedData) {
+	const mainCriteriaGroupDiv = searchResultDiv.firstElementChild
+		  .firstElementChild
+		  .nextElementSibling
+		  .firstElementChild
+		  .nextElementSibling;
+
+	const totalRentDiv = mainCriteriaGroupDiv.firstElementChild;
+	const totalRentAndUnit = totalRentDiv.innerText;
+	const [totalRent, totalRentUnit] = splitAt(totalRentAndUnit, " ");
+	parsedData.totalRent = parseGermanDecimal(totalRent, /\./g);
+	parsedData.totalRentUnit = totalRentUnit;
+
+	const availabilityDiv = totalRentDiv.nextElementSibling;
+
+	const floorAreaDiv = availabilityDiv.nextElementSibling;
+	const floorAreaAndUnit = floorAreaDiv.innerText;
+	const [floorArea, floorAreaUnit] = splitAtLast(floorAreaAndUnit, " ");
+	parsedData.floorArea = parseGermanDecimal(floorArea);
+	parsedData.floorAreaUnit = floorAreaUnit;
+
+	return mainCriteriaGroupDiv;
+}
+
+
+function enhanceSearchResult(searchResult) {
+	const parsedData = new MainParsedData();
+	parsedData.site = site;
+
+	const searchResultDiv = findSearchResultDiv(searchResult);
+	const resultAnchor = parseSearchResultDiv(searchResultDiv, parsedData);
+
+	parsedData.calculateRemaining();
+	displayMainParsedData(parsedData, resultAnchor, ["totalRentPerArea"]);
+
+	return searchResultDiv.nextElementSibling;
+}
+
+
+async function enhanceWggSearch() {
+	const contentDiv = document.getElementById("main_content");
+	let searchResult = contentDiv.firstElementChild
+		  .firstElementChild
+		  .nextElementSibling
+		  .nextElementSibling
+		  .nextElementSibling;
+	while (searchResult !== null && searchResult.hasAttribute("id")
+		   && searchResult.getAttribute("id").startsWith("back_to_ad_")) {
+		searchResult = enhanceSearchResult(searchResult);
+	}
+}
+
+
+function isSearchPage() {
+	const listItems = document.getElementsByClassName(
+		"wgg_card offer_list_item"
+	);
+	return listItems.length > 0;
+}
+
+
+function isIndividualListing() {
+	return document.getElementById("WG-Pictures") !== null
+		|| document.getElementById("noImagesTeaser") !== null
+		|| document.getElementById("freitext_0_content") !== null;
+}
+
+
 async function main() {
-	if (document.getElementById("WG-Pictures") === null
-		&& document.getElementById("noImagesTeaser") === null
-		&& document.getElementById("freitext_0_content") === null) {
-		console.log("We are not on an individual listing page.");
+	if (!isIndividualListing() && !isSearchPage()) {
+		console.log(
+			"We are neither on an individual listing page nor "
+				+ "on a search page (with results)."
+		);
 		return;
 	}
 	// await shortSleep(1000);
 
 	console.log("Starting enhancements!");
-	await enhanceWgg();
+	if (isIndividualListing()) {
+		await enhanceWgg();
+	} else if (isSearchPage()) {
+		await enhanceWggSearch();
+	}
 	console.log("Enhancements done!");
 }
 
