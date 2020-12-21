@@ -158,14 +158,24 @@ function parseEstateOverviewDiv(estateOverviewDiv, parsedData) {
 }
 
 
-function parseOptionalFlatOverview(estateOverviewDiv) {
+function handleOptionalCreditAd(estateOverviewDiv) {
+	const maybeMoreThanCreditAdDiv = estateOverviewDiv.nextElementSibling;
 	const maybeSharedFlatOverviewDiv = estateOverviewDiv.nextElementSibling
 		  .nextElementSibling
 		  .nextElementSibling
 		  .nextElementSibling
-		  .nextElementSibling
 		  .nextElementSibling;
-	const maybeSharedFlatTitleGroupDiv = maybeSharedFlatOverviewDiv.firstElementChild;
+
+	if (maybeMoreThanCreditAdDiv.className === "row") {
+		return maybeSharedFlatOverviewDiv.nextElementSibling;
+	}
+	return maybeSharedFlatOverviewDiv;
+}
+
+
+function parseOptionalSharedFlatOverview(maybeSharedFlatOverviewDiv) {
+	const maybeSharedFlatTitleGroupDiv = maybeSharedFlatOverviewDiv
+		  .firstElementChild;
 
 	if (maybeSharedFlatTitleGroupDiv.innerText.trim() !== "WG-Details") {
 		return maybeSharedFlatOverviewDiv;
@@ -452,7 +462,12 @@ async function parseContentDiv(contentDiv, parsedData) {
 		  .nextElementSibling;
 	parseEstateOverviewDiv(estateOverviewDiv, parsedData);
 
-	const criteriaTagsOverviewDiv = parseOptionalFlatOverview(estateOverviewDiv);
+	const maybeSharedFlatOverviewDiv = handleOptionalCreditAd(
+		estateOverviewDiv
+	);
+	const criteriaTagsOverviewDiv = parseOptionalSharedFlatOverview(
+		maybeSharedFlatOverviewDiv
+	);
 
 	parseCriteriaTagsOverviewDiv(criteriaTagsOverviewDiv, parsedData);
 
