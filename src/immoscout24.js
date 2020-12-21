@@ -403,8 +403,10 @@ function parseRemainingInformationDiv(remainingInformationDiv, parsedData) {
 	// Total Rent (class "is24qa-gesamtmiete")
 	const totalRentDiv = totalRentTitleDiv.nextElementSibling;
 	const totalRentAndUnit = totalRentDiv.innerText;
-	const [totalRent, totalRentUnit] = splitAtLast(totalRentAndUnit, " ");
-	parsedData.totalRent = parseGermanDecimal(totalRent);
+	// Thousands are separated by a period; splitting at first space is fine.
+	const [totalRent, totalRentUnit] = splitAt(totalRentAndUnit, " ");
+	// Thousands are separated by a period; simply remove those.
+	parsedData.totalRent = parseGermanDecimal(totalRent.replace(/./g, ""));
 	parsedData.totalRentUnit = totalRentUnit;
 
 	// Rent Deposit Overview
