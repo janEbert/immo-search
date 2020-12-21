@@ -12,6 +12,9 @@
 // } from "./common.js";
 
 
+const site = "wg-gesucht.de";
+
+
 function findMoreThanTitleDiv(titlePhotoDiv) {
 	const noPicturesTitleDiv = document.getElementById("noImagesTeaser");
 	if (noPicturesTitleDiv !== null) {
@@ -490,10 +493,10 @@ async function parseContentDiv(contentDiv, parsedData) {
 }
 
 
-async function enhanceWGG() {
+async function enhanceWgg() {
 	const parsedData = new ParsedData();
 
-	parsedData.site = "wg-gesucht.de";
+	parsedData.site = site;
 	console.log("debug");
 	const contentDiv = document.getElementById("main_content");
 	await parseContentDiv(contentDiv, parsedData);
@@ -518,7 +521,7 @@ async function main() {
 	// await shortSleep(1000);
 
 	console.log("Starting enhancements!");
-	await enhanceWGG();
+	await enhanceWgg();
 	console.log("Enhancements done!");
 }
 

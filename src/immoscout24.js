@@ -11,6 +11,9 @@
 // } from "./common.js";
 
 
+const site = "immobilienscout24.de";
+
+
 function getFullDescription(descriptionPre) {
 	// Click "show more" button automatically to get full object description
 	const descriptionShowMoreA = descriptionPre
@@ -678,10 +681,10 @@ function parseContentDiv(contentDiv, parsedData) {
 }
 
 
-function enhanceIS24() {
+function enhanceIs24() {
 	const parsedData = new ParsedData();
 
-	parsedData.site = "immobilienscout24.de";
+	parsedData.site = site;
 	console.log("debug");
 	const contentDiv = document.getElementById("is24-content");
 	parseContentDiv(contentDiv, parsedData);
@@ -704,7 +707,7 @@ async function main() {
 	// await shortSleep(1000);
 
 	console.log("Starting enhancements!");
-	enhanceIS24();
+	enhanceIs24();
 	console.log("Enhancements done!");
 }
 
