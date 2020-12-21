@@ -9,12 +9,210 @@ const updateListingButtonLabel = "Gespeichert";
 const removeListingButtonLabel = "Anzeige löschen";
 
 
-class ParsedData {
+class MainParsedData {
 	constructor() {
 		this.site = "";
 		this.retrievalDate = new Date().toISOString();
 		this.title = "";
 		this.id = "";
+
+		// Rent
+		this.coldRent = "";
+		this.coldRentUnit = "";
+		this.totalRent = "";
+		this.totalRentUnit = "";
+
+		// Area
+		this.floorArea = "";
+		this.floorAreaUnit = "";
+
+		// Calculated later
+		this.url = "";
+		this.coldRentPerArea = "";
+		this.totalRentPerArea = "";
+	}
+
+	calculateRemaining() {
+		this.url = this.getUrl();
+
+		this.coldRentPerArea = this.coldRent / this.floorArea;
+		this.totalRentPerArea = this.totalRent / this.floorArea;
+	}
+
+	formatSite() {
+		return ["Seite", this.site];
+	}
+
+	formatUrl() {
+		return ["URL", this.url];
+	}
+
+	formatRetrievalDate() {
+		return ["Abgerufen am", isoDateToGerman(this.retrievalDate)];
+	}
+
+	formatTitle() {
+		return ["Titel", this.title];
+	}
+
+	formatId() {
+		return ["ID", this.id];
+	}
+
+	formatColdRent() {
+		return [
+			"Kalt",
+			formatPrice(this.coldRent)
+				+ unitSeparator + this.formatColdRentUnit()[1]
+		];
+	}
+
+	formatColdRentPerArea() {
+		return [
+			"Kalt/Fläche",
+			formatPrice(this.coldRentPerArea)
+				+ unitSeparator + this.formatColdRentUnit()[1]
+				+ "/" + this.formatFloorAreaUnit()[1]
+		];
+	}
+
+	formatColdRentUnit() {
+		return ["Kalt Einheit", this.coldRentUnit];
+	}
+
+	formatTotalRent() {
+		return [
+			"Gesamt",
+			formatPrice(this.totalRent)
+				+ unitSeparator + this.formatTotalRentUnit()[1]
+		];
+	}
+
+	formatTotalRentPerArea() {
+		return [
+			"Gesamt/Fläche",
+			formatPrice(this.totalRentPerArea)
+				+ unitSeparator + this.formatTotalRentUnit()[1]
+				+ "/" + this.formatFloorAreaUnit()[1]
+		];
+	}
+
+	formatTotalRentUnit() {
+		return ["Gesamt Einheit", this.totalRentUnit];
+	}
+
+	formatFloorArea() {
+		return ["Fläche", this.floorArea
+				+ unitSeparator + this.formatFloorAreaUnit()[1]];
+	}
+
+	formatFloorAreaUnit() {
+		return ["Fläche Einheit", this.floorAreaUnit];
+	}
+
+	formatKeys(desiredKeys) {
+		const formattedKeys = (
+			desiredKeys || Object.getOwnPropertyNames(this)
+		).map(function(key) {
+			const formatMethodName = (
+				"format" + key.charAt(0).toUpperCase() + key.slice(1)
+			);
+			if (this[formatMethodName] === undefined
+				|| typeof this[formatMethodName] !== "function") {
+				console.log("Skipping unknown key " + key);
+				return null;
+			}
+
+			return this[formatMethodName]();
+		}.bind(this)).filter(function(value) {
+			return value !== null;
+		});
+
+		return formattedKeys;
+	}
+
+	defaultTableStyle() {
+		const tableStyle = document.createElement("style");
+		tableStyle.innerText = (
+			"th, td { padding: 1rem; border: 1px black solid; } "
+				+ "td > div { max-height: 20rem; overflow: auto; }"
+		);
+		return tableStyle;
+	}
+
+	toHtmlTableHead(formattedKeys) {
+		const tableHead = document.createElement("thead");
+		const tableHeadRow = document.createElement("tr");
+		for (const key of formattedKeys) {
+			const tableCell = document.createElement("th");
+			tableCell.innerText = key[0];
+			tableHeadRow.appendChild(tableCell);
+		}
+		tableHead.appendChild(tableHeadRow);
+		return tableHead;
+	}
+
+	toHtmlTableBody(formattedKeys) {
+		const tableBody = document.createElement("tbody");
+		const tableBodyRow = document.createElement("tr");
+		for (const key of formattedKeys) {
+			const tableCell = document.createElement("td");
+			const tableCellDiv = document.createElement("div");
+
+			tableCellDiv.innerText = key[1];
+
+			tableCell.appendChild(tableCellDiv);
+			tableBodyRow.appendChild(tableCell);
+		}
+		tableBody.appendChild(tableBodyRow);
+		return tableBody;
+	}
+
+	toHtmlTable(desiredKeys) {
+		const formattedKeys = this.formatKeys(desiredKeys);
+
+		const table = document.createElement("table");
+		table.style.margin = "1rem";
+
+		table.appendChild(this.defaultTableStyle());
+		table.appendChild(this.toHtmlTableHead(formattedKeys));
+		table.appendChild(this.toHtmlTableBody(formattedKeys));
+
+		return table;
+	}
+
+	immoscout24Url() {
+		return "https://www." + this.site + "/expose/" + this.id;
+	}
+
+	wgGesuchtUrl() {
+		return "https://www." + this.site + "/" + this.id;
+	}
+
+	getUrl() {
+		const urlSwitcher = {
+			"immobilienscout24.de": this.immoscout24Url,
+			"wg-gesucht.de": this.wgGesuchtUrl,
+		};
+
+		if (!Object.prototype.hasOwnProperty.call(urlSwitcher, this.site)) {
+			console.log("Unknown site!");
+			return null;
+		}
+
+		return urlSwitcher[this.site].bind(this)();
+	}
+
+	getStorageKey() {
+		return getHideStorageKey(this.site, this.id);
+	}
+}
+
+
+class ParsedData extends MainParsedData {
+	constructor() {
+		super();
+
 		// Called Object ID at ImmoScout24; does not exist for every real estate
 		// listing, so do not know what it is.
 		this.estateId = "";
@@ -34,18 +232,12 @@ class ParsedData {
 		this.region = "";
 
 		// Rent
-		this.coldRent = "";
-		this.coldRentUnit = "";
-		this.totalRent = "";
-		this.totalRentUnit = "";
 		this.rentDeposit = "";
 		this.rentDepositUnit = "";
 		this.compensationCosts = "";
 		this.compensationCostsUnit = "";
 
 		// Area
-		this.floorArea = "";
-		this.floorAreaUnit = "";
 		this.usableArea = "";
 		this.usableAreaUnit = "";
 
@@ -74,19 +266,14 @@ class ParsedData {
 		this.miscDescription = "";
 
 		// Calculated later
-		this.url = "";
-		this.coldRentPerArea = "";
-		this.totalRentPerArea = "";
 		this.additionalCosts = "";
 		this.additionalCostsPerArea = "";
 		this.additionalCostsUnit = "";
 	}
 
 	calculateRemaining() {
-		this.url = this.getUrl();
+		super.calculateRemaining();
 
-		this.coldRentPerArea = this.coldRent / this.floorArea;
-		this.totalRentPerArea = this.totalRent / this.floorArea;
 		this.additionalCosts = this.totalRent - this.coldRent;
 		this.additionalCostsPerArea = this.additionalCosts / this.floorArea;
 
@@ -98,23 +285,23 @@ class ParsedData {
 	}
 
 	formatSite() {
-		return ["Seite", this.site];
+		return ["Seite", super.formatSite()[1]];
 	}
 
 	formatUrl() {
-		return ["URL", this.url];
+		return ["URL", super.formatUrl()[1]];
 	}
 
 	formatRetrievalDate() {
-		return ["Abgerufen am", isoDateToGerman(this.retrievalDate)];
+		return ["Abgerufen am", super.formatRetrievalDate()[1]];
 	}
 
 	formatTitle() {
-		return ["Titel", this.title];
+		return ["Titel", super.formatTitle()[1]];
 	}
 
 	formatId() {
-		return ["ID", this.id];
+		return ["ID", super.formatId()[1]];
 	}
 
 	formatEstateId() {
@@ -158,45 +345,27 @@ class ParsedData {
 	}
 
 	formatColdRent() {
-		return [
-			"Kalt",
-			formatPrice(this.coldRent)
-				+ unitSeparator + this.formatColdRentUnit()[1]
-		];
+		return ["Kalt", super.formatColdRent()[1]];
 	}
 
 	formatColdRentPerArea() {
-		return [
-			"Kalt/Fläche",
-			formatPrice(this.coldRentPerArea)
-				+ unitSeparator + this.formatColdRentUnit()[1]
-				+ "/" + this.formatFloorAreaUnit()[1]
-		];
+		return ["Kalt/Fläche", super.formatColdRentPerArea()[1]];
 	}
 
 	formatColdRentUnit() {
-		return ["Kalt Einheit", this.coldRentUnit];
+		return ["Kalt Einheit", super.formatColdRentUnit()[1]];
 	}
 
 	formatTotalRent() {
-		return [
-			"Gesamt",
-			formatPrice(this.totalRent)
-				+ unitSeparator + this.formatTotalRentUnit()[1]
-		];
+		return ["Gesamt", super.formatTotalRent()[1]];
 	}
 
 	formatTotalRentPerArea() {
-		return [
-			"Gesamt/Fläche",
-			formatPrice(this.totalRentPerArea)
-				+ unitSeparator + this.formatTotalRentUnit()[1]
-				+ "/" + this.formatFloorAreaUnit()[1]
-		];
+		return ["Gesamt/Fläche", super.formatTotalRentPerArea()[1]];
 	}
 
 	formatTotalRentUnit() {
-		return ["Gesamt Einheit", this.totalRentUnit];
+		return ["Gesamt Einheit", super.formatTotalRentUnit()[1]];
 	}
 
 	formatAdditionalCosts() {
@@ -244,12 +413,11 @@ class ParsedData {
 	}
 
 	formatFloorArea() {
-		return ["Fläche", this.floorArea
-				+ unitSeparator + this.formatFloorAreaUnit()[1]];
+		return ["Fläche", super.formatFloorArea()[1]];
 	}
 
 	formatFloorAreaUnit() {
-		return ["Fläche Einheit", this.floorAreaUnit];
+		return ["Fläche Einheit", super.formatFloorAreaUnit()[1]];
 	}
 
 	formatUsableArea() {
@@ -336,34 +504,6 @@ class ParsedData {
 		return ["Sonstiges", this.miscDescription];
 	}
 
-	formatKeys(desiredKeys) {
-		const formattedKeys = (
-			desiredKeys || Object.getOwnPropertyNames(this)
-		).map(function(key) {
-			const formatMethodName = (
-				"format" + key.charAt(0).toUpperCase() + key.slice(1)
-			);
-			if (this[formatMethodName] === undefined
-				|| typeof this[formatMethodName] !== "function") {
-				console.log("Skipping unknown key " + key);
-				return null;
-			}
-
-			return this[formatMethodName]();
-		}.bind(this)).filter(function(value) {
-			return value !== null;
-		});
-
-		return formattedKeys;
-	}
-
-	defaultTableStyle() {
-		return "<style>"
-			+ "th, td { padding: 1rem; border: 1px black solid; }"
-			+ "td > div { max-height: 20rem; overflow: auto; }"
-			+ "</style>";
-	}
-
 	defaultShownKeys() {
 		return [
 			"title",
@@ -409,19 +549,14 @@ class ParsedData {
 	toHtmlTable(desiredKeys) {
 		const formattedKeys = this.formatKeys(desiredKeys);
 
-		return "<table style=\"margin-bottom: 2rem;\">"
-			+ this.defaultTableStyle()
-			+ "</thead><tr>"
-			+ formattedKeys.map(function(key) {
-				return "<th>" + key[0] + "</th>";
-			}).join("")
-			+ "</tr></thead>"
-			+ "<tbody><tr>"
-			+ formattedKeys.map(function(key) {
-				return "<td><div>" + key[1] + "</div></td>";
-			}).join("")
-			+ "</tr></tbody>"
-			+ "</table>";
+		const table = document.createElement("table");
+		table.style.marginBottom = "2em";
+
+		table.appendChild(this.defaultTableStyle());
+		table.appendChild(this.toHtmlTableHead(formattedKeys));
+		table.appendChild(this.toHtmlTableBody(formattedKeys));
+
+		return table;
 	}
 
 	toOrgTableHeader(desiredKeys) {
@@ -431,7 +566,7 @@ class ParsedData {
 			+ formattedKeys.map(function(key) {
 				return key[0];
 			}).join(" | ")
-			+ " |<br>"
+			+ " |\n"
 			+ "|-";
 	}
 
@@ -460,31 +595,19 @@ class ParsedData {
 		return JSON.stringify(this);
 	}
 
-	immoscout24Url() {
-		return "https://www." + this.site + "/expose/" + this.id;
-	}
-
-	wgGesuchtUrl() {
-		return "https://www." + this.site + "/" + this.id;
-	}
-
-	getUrl() {
-		const urlSwitcher = {
-			"immobilienscout24.de": this.immoscout24Url,
-			"wg-gesucht.de": this.wgGesuchtUrl,
-		};
-
-		if (!Object.prototype.hasOwnProperty.call(urlSwitcher, this.site)) {
-			console.log("Unknown site!");
-			return null;
-		}
-
-		return urlSwitcher[this.site].bind(this)();
-	}
-
 	getStorageKey() {
-		return "i-" + this.site + "/" + this.id;
+		return getStorageKey(this.site, this.id);
 	}
+}
+
+
+function getStorageKey(site, id) {
+	return "i-" + site + "/" + id;
+}
+
+
+function getHideStorageKey(site, id) {
+	return "h" + getStorageKey(site, id);
 }
 
 
@@ -611,7 +734,7 @@ function removeData(keys) {
 
 function insertResult(resultText, parentNode, nextSibling, tag) {
 	const resultNode = document.createElement(tag || "p");
-	resultNode.innerHTML = resultText;
+	resultNode.innerText = resultText;
 	registerClipboard(resultNode);
 	const separator = parentNode.insertBefore(
 		document.createElement("hr"),
@@ -716,7 +839,7 @@ async function displayData(parsedData, parentNode) {
 
 	const tableContainer = document.createElement("p");
 	const resultTable = await parsedData.toDefaultHtmlTable();
-	tableContainer.innerHTML = resultTable;
+	tableContainer.appendChild(resultTable);
 	parentNode.insertBefore(tableContainer, parentNode.firstElementChild);
 
 	loadData(parsedData.getStorageKey()).then(
