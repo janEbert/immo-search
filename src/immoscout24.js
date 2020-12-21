@@ -104,8 +104,8 @@ function parseMainCriteriaDiv(mainCriteriaDiv, parsedData) {
 		  .firstElementChild;
 	// Remove space symbol and unit
 	const coldRentAndUnit = coldRentDiv.innerText;
-	const [coldRent, coldRentUnit] = splitAtLast(coldRentAndUnit, " ");
-	parsedData.coldRent = parseGermanDecimal(coldRent);
+	const [coldRent, coldRentUnit] = splitAt(coldRentAndUnit, " ");
+	parsedData.coldRent = parseGermanDecimal(coldRent, /\./g);
 	parsedData.coldRentUnit = coldRentUnit;
 
 	// Number of Rooms
@@ -406,7 +406,7 @@ function parseRemainingInformationDiv(remainingInformationDiv, parsedData) {
 	// Thousands are separated by a period; splitting at first space is fine.
 	const [totalRent, totalRentUnit] = splitAt(totalRentAndUnit, " ");
 	// Thousands are separated by a period; simply remove those.
-	parsedData.totalRent = parseGermanDecimal(totalRent.replace(/\./g, ""));
+	parsedData.totalRent = parseGermanDecimal(totalRent, /\./g);
 	parsedData.totalRentUnit = totalRentUnit;
 
 	// Rent Deposit Overview

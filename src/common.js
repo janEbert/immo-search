@@ -649,8 +649,11 @@ function splitAtLast(text, separator) {
 }
 
 
-function parseGermanDecimal(commaText) {
-	const periodText = commaText.replace(",", ".");
+function parseGermanDecimal(commaText, thousandsSeparatorRegexp) {
+	const nonSeparatedText = thousandsSeparatorRegexp !== undefined
+		  ? commaText.replace(thousandsSeparatorRegexp, "")
+		  : commaText;
+	const periodText = nonSeparatedText.replace(",", ".");
 	const value = parseFloat(periodText, 10);
 	return value;
 }
