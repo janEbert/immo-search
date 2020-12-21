@@ -1,6 +1,14 @@
 // Common functions for parsing and displaying parsed information on
 // real estate listing sites.
 
+
+const unitSeparator = " ";
+
+const storeListingButtonLabel = "Anzeige speichern";
+const updateListingButtonLabel = "Gespeichert";
+const removeListingButtonLabel = "Anzeige löschen";
+
+
 class ParsedData {
 	constructor() {
 		this.site = "";
@@ -152,7 +160,8 @@ class ParsedData {
 	formatColdRent() {
 		return [
 			"Kalt",
-			formatPrice(this.coldRent) + " " + this.formatColdRentUnit()[1]
+			formatPrice(this.coldRent)
+				+ unitSeparator + this.formatColdRentUnit()[1]
 		];
 	}
 
@@ -160,7 +169,7 @@ class ParsedData {
 		return [
 			"Kalt/Fläche",
 			formatPrice(this.coldRentPerArea)
-				+ " " + this.formatColdRentUnit()[1]
+				+ unitSeparator + this.formatColdRentUnit()[1]
 				+ "/" + this.formatFloorAreaUnit()[1]
 		];
 	}
@@ -172,7 +181,8 @@ class ParsedData {
 	formatTotalRent() {
 		return [
 			"Gesamt",
-			formatPrice(this.totalRent) + " " + this.formatTotalRentUnit()[1]
+			formatPrice(this.totalRent)
+				+ unitSeparator + this.formatTotalRentUnit()[1]
 		];
 	}
 
@@ -180,7 +190,7 @@ class ParsedData {
 		return [
 			"Gesamt/Fläche",
 			formatPrice(this.totalRentPerArea)
-				+ " " + this.formatTotalRentUnit()[1]
+				+ unitSeparator + this.formatTotalRentUnit()[1]
 				+ "/" + this.formatFloorAreaUnit()[1]
 		];
 	}
@@ -193,7 +203,7 @@ class ParsedData {
 		return [
 			"NK",
 			formatPrice(this.additionalCosts)
-				+ " " + this.formatAdditionalCostsUnit()[1]
+				+ unitSeparator + this.formatAdditionalCostsUnit()[1]
 		];
 	}
 
@@ -201,7 +211,7 @@ class ParsedData {
 		return [
 			"NK/Fläche",
 			formatPrice(this.additionalCostsPerArea)
-				+ " " + this.formatAdditionalCostsUnit()[1]
+				+ unitSeparator + this.formatAdditionalCostsUnit()[1]
 				+ "/" + this.formatFloorAreaUnit()[1]
 		];
 	}
@@ -213,7 +223,7 @@ class ParsedData {
 	formatRentDeposit() {
 		return [
 			"Kaution",
-			this.rentDeposit + " " + this.formatRentDepositUnit()[1]
+			this.rentDeposit + unitSeparator + this.formatRentDepositUnit()[1]
 		];
 	}
 
@@ -224,7 +234,8 @@ class ParsedData {
 	formatCompensationCosts() {
 		return [
 			"Ablösevereinbahrung",
-			this.compensationCosts + " " + this.formatCompensationCostsUnit()[1]
+			this.compensationCosts
+				+ unitSeparator + this.formatCompensationCostsUnit()[1]
 		];
 	}
 
@@ -233,7 +244,8 @@ class ParsedData {
 	}
 
 	formatFloorArea() {
-		return ["Fläche", this.floorArea + " " + this.formatFloorAreaUnit()[1]];
+		return ["Fläche", this.floorArea
+				+ unitSeparator + this.formatFloorAreaUnit()[1]];
 	}
 
 	formatFloorAreaUnit() {
@@ -243,7 +255,8 @@ class ParsedData {
 	formatUsableArea() {
 		return [
 			"Nutzfläche",
-			this.usableArea + " " + this.formatUsableAreaUnit()[1]
+			this.usableArea
+				+ unitSeparator + this.formatUsableAreaUnit()[1]
 		];
 	}
 
@@ -568,7 +581,7 @@ function isoDateToGerman(date) {
 	const month = date.slice(5, 7);
 	const day = date.slice(8, 10);
 	const time = date.slice(11, 19);
-	return day + "." + month + "." + year + " " + time + " UTC";
+	return day + "." + month + "." + year + unitSeparator + time + " UTC";
 }
 
 
@@ -630,7 +643,7 @@ function createRemoveButton(parsedData, label, storeButton) {
 			() => {
 				console.log("Removed data");
 				button.remove();
-				storeButton.innerText = "Anzeige speichern";
+				storeButton.innerText = storeListingButtonLabel;
 			},
 			(error) => console.log("Error removing data: " + error)
 		);
@@ -642,7 +655,7 @@ function createRemoveButton(parsedData, label, storeButton) {
 function insertRemoveButton(parsedData, storeButton) {
 	const removeButton = createRemoveButton(
 		parsedData,
-		"Anzeige löschen",
+		removeListingButtonLabel,
 		storeButton,
 	);
 
@@ -661,7 +674,7 @@ function createStoreButton(parsedData, label) {
 		storeData(parsedData).then(
 			() => {
 				console.log("Stored data");
-				button.innerHTML = "Gespeichert";
+				button.innerHTML = updateListingButtonLabel;
 				insertRemoveButton(parsedData, button);
 			},
 			(error) => console.log("Error storing data: " + error)
@@ -709,12 +722,16 @@ async function displayData(parsedData, parentNode) {
 	loadData(parsedData.getStorageKey()).then(
 		(storedData) => {
 			if (Object.keys(storedData).length === 0) {
-				insertStoreButton("Anzeige speichern", parsedData, parentNode);
+				insertStoreButton(
+					storeListingButtonLabel,
+					parsedData,
+					parentNode,
+				);
 				return;
 			}
 
 			const storeButton = insertStoreButton(
-				"Gespeichert",
+				updateListingButtonLabel,
 				parsedData,
 				parentNode,
 			);
@@ -722,7 +739,7 @@ async function displayData(parsedData, parentNode) {
 		},
 		(error) => {
 			console.log("Load error: " + error);
-			insertStoreButton("Anzeige speichern", parsedData, parentNode);
+			insertStoreButton(storeListingButtonLabel, parsedData, parentNode);
 		}
 	);
 }
