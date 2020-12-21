@@ -406,7 +406,7 @@ function parseRemainingInformationDiv(remainingInformationDiv, parsedData) {
 	// Thousands are separated by a period; splitting at first space is fine.
 	const [totalRent, totalRentUnit] = splitAt(totalRentAndUnit, " ");
 	// Thousands are separated by a period; simply remove those.
-	parsedData.totalRent = parseGermanDecimal(totalRent.replace(/./g, ""));
+	parsedData.totalRent = parseGermanDecimal(totalRent.replace(/\./g, ""));
 	parsedData.totalRentUnit = totalRentUnit;
 
 	// Rent Deposit Overview
