@@ -871,6 +871,17 @@ async function displayData(parsedData, parentNode) {
 }
 
 
+async function displayMainParsedData(parsedData, parentNode, keys) {
+	const tableContainer = document.createElement("p");
+	tableContainer.style.margin = "1em";
+	const resultTable = parsedData.toHtmlTable(keys);
+	tableContainer.appendChild(resultTable);
+	parentNode.insertBefore(tableContainer, parentNode.firstElementChild);
+
+	// FIXME add "hide" button
+}
+
+
 // export {
 // 	ParsedData,
 // 	shortSleep,
