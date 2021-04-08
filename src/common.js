@@ -714,11 +714,10 @@ function isoDateToGerman(date) {
 	const day = date.slice(firstNumIndex + 8, firstNumIndex + 10);
 	const time = date.slice(firstNumIndex + 11, firstNumIndex + 19);
 
-	let germanDate = day + "." + month + "." + year + unitSeparator;
+	let germanDate = day + "." + month + "." + year;
 	if (/^\d\d?:\d\d?/.test(time)) {
-		germanDate = germanDate + time + unitSeparator;
+		germanDate = germanDate + unitSeparator + time + unitSeparator + "UTC";
 	}
-	germanDate = germanDate + "UTC";
 	return germanDate;
 }
 
