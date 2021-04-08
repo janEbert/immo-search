@@ -882,6 +882,11 @@ async function displayMainParsedData(parsedData, parentNode, keys) {
 }
 
 
+function treatDistraction(node) {
+	node.style.opacity = "10%";
+}
+
+
 // export {
 // 	ParsedData,
 // 	shortSleep,

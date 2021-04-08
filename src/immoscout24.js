@@ -704,7 +704,7 @@ async function main() {
 	while (document.getElementById("is24-page-loaded") === null) {
 		await shortSleep(500);
 	}
-	// await shortSleep(1000);
+	await shortSleep(500);
 
 	console.log("Starting enhancements!");
 	enhanceIs24();

@@ -448,14 +448,21 @@ function parseContactOverviewDiv(contactOverviewDiv, parsedData) {
 
 async function parseContentDiv(contentDiv, parsedData) {
 	const flatOverviewDiv = contentDiv.firstElementChild;
-	const titlePhotoDiv = flatOverviewDiv.firstElementChild
+	const maybeNoTitlePhotoDiv = flatOverviewDiv.firstElementChild
 		  .nextElementSibling
 		  .firstElementChild
 		  .firstElementChild
-		  .nextElementSibling
 		  .nextElementSibling
 		  .nextElementSibling
 		  .nextElementSibling;
+	let titlePhotoDiv;
+	if (maybeNoTitlePhotoDiv.hasAttribute("class")
+		&& maybeNoTitlePhotoDiv.classList.length > 1
+		&& maybeNoTitlePhotoDiv.classList[1] == "showOnGalleryOnly") {
+		titlePhotoDiv = maybeNoTitlePhotoDiv.nextElementSibling;
+	} else {
+		titlePhotoDiv = maybeNoTitlePhotoDiv;
+	}
 	await parseTitlePhotoDiv(titlePhotoDiv, parsedData);
 
 	const mainCriteriaDiv = titlePhotoDiv.nextElementSibling;
@@ -512,11 +519,21 @@ async function enhanceWgg() {
 
 
 function findSearchResultDiv(searchResult) {
-	const preSearchResultDiv = searchResult.nextElementSibling;
+	let preSearchResultDiv = searchResult.nextElementSibling;
+	if (preSearchResultDiv.hasAttribute("class")
+		&& preSearchResultDiv.getAttribute("class") == "mb20") {
+		preSearchResultDiv = preSearchResultDiv.nextElementSibling;
+	}
 	if (preSearchResultDiv.hasAttribute("id")
 		&& preSearchResultDiv.getAttribute("id")
 		.startsWith("liste-details-ad-")) {
-		const searchResultDiv = preSearchResultDiv.nextElementSibling;
+		const maybeAdSearchResultDiv = preSearchResultDiv.nextElementSibling;
+		if (maybeAdSearchResultDiv.hasAttribute("class")
+			&& maybeAdSearchResultDiv.classList.length <= 2) {
+			return maybeAdSearchResultDiv;
+		}
+		const searchResultDiv = maybeAdSearchResultDiv.nextElementSibling;
+		treatDistraction(maybeAdSearchResultDiv);
 		return searchResultDiv;
 	}
 
@@ -565,11 +582,12 @@ function enhanceSearchResult(searchResult) {
 
 async function enhanceWggSearch() {
 	const contentDiv = document.getElementById("main_content");
-	let searchResult = contentDiv.firstElementChild
+	const firstAd = contentDiv.firstElementChild
 		  .firstElementChild
 		  .nextElementSibling
-		  .nextElementSibling
 		  .nextElementSibling;
+	let searchResult = firstAd.nextElementSibling;
+	treatDistraction(firstAd);
 	while (searchResult !== null && searchResult.hasAttribute("id")
 		   && searchResult.getAttribute("id").startsWith("back_to_ad_")) {
 		searchResult = enhanceSearchResult(searchResult);
