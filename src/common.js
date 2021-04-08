@@ -686,28 +686,40 @@ function formatBoolean(bool) {
 
 
 function isGermanDate(date) {
-	return /^\d\d?.\d\d?.\d?\d?\d{2}$/.test(date);
+	return /^\d\d?\.\d\d?\.\d?\d?\d{2}$/.test(date);
 }
 
 
 function germanDateToIso(date) {
-	if (!isGermanDate(date)) {
+	const maybeDatePart = /\d\d?\.\d\d?\.\d?\d?\d{2}/.exec(date);
+	if (maybeDatePart === null) {
 		return date;
 	}
-	return date.split(".").reverse().join("-");
+	const datePart = maybeDatePart[0];
+	return datePart.split(".").reverse().join("-");
 }
 
 
 function isoDateToGerman(date) {
+	const firstNumIndex = date.search(/\d/);
+	if (firstNumIndex === -1) {
+		return date;
+	}
 	if (date.length <= 10) {
 		return date.split("-").reverse().join(".");
 	}
 
-	const year = date.slice(0, 4);
-	const month = date.slice(5, 7);
-	const day = date.slice(8, 10);
-	const time = date.slice(11, 19);
-	return day + "." + month + "." + year + unitSeparator + time + " UTC";
+	const year = date.slice(firstNumIndex, firstNumIndex + 4);
+	const month = date.slice(firstNumIndex + 5, firstNumIndex + 7);
+	const day = date.slice(firstNumIndex + 8, firstNumIndex + 10);
+	const time = date.slice(firstNumIndex + 11, firstNumIndex + 19);
+
+	let germanDate = day + "." + month + "." + year + unitSeparator;
+	if (/^\d\d?:\d\d?/.test(time)) {
+		germanDate = germanDate + time + unitSeparator;
+	}
+	germanDate = germanDate + "UTC";
+	return germanDate;
 }
 
 
