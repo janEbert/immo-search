@@ -73,6 +73,9 @@ function parseTitleAddressDiv(titleAddressDiv, parsedData) {
 	// Address
 	const addressDiv = titleDiv.nextElementSibling
 		  .firstElementChild
+		  .firstElementChild
+		  .nextElementSibling
+		  .firstElementChild
 		  .nextElementSibling
 		  .firstElementChild
 		  .firstElementChild
